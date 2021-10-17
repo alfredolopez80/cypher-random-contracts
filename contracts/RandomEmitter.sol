@@ -30,7 +30,7 @@ contract RandomEmitter is VRFConsumerBase {
             msg.sender == owner,
             "Only the owner can request for a random number."
         );
-        currentRequestId = requestRandomness(keyHash, 0.1 ether);
+        currentRequestId = requestRandomness(keyHash, 0.0001 ether);
         emit Request(currentRequestId);
     }
 

@@ -37,6 +37,10 @@ module.exports = {
         mumbai: {
             url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
             accounts: [`${TEST_PRIVATE_KEY}`]
+        },
+        polygon: {
+            url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            accounts: [`${TEST_PRIVATE_KEY}`]
         }
 
     },
