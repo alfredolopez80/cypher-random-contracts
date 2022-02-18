@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
-import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+// SPDX-License-Identifier: MIT
 
+pragma solidity ^0.8.4;
+import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBase.sol";
 
 contract RandomEmitter is VRFConsumerBase {
@@ -9,19 +9,24 @@ contract RandomEmitter is VRFConsumerBase {
     address public owner;
 
     bytes32 internal keyHash;
+	uint256 internal fee;
     bytes32 public currentRequestId;
 
     event Request(bytes32 requestId);
     event RandomNumber(uint256 randomNumber);
     event ReturnLink(uint256 amount);
+	// Event when change the fee value for Interaction with Chainlink Oracle
+	event ChgFee(uint256 oldFee, uint256 newFee);
 
     constructor(
         address _vrfCoordinator,
         address _linkToken,
-        bytes32 _keyHash
+        bytes32 _keyHash,
+		uint256 _fee
     ) VRFConsumerBase(_vrfCoordinator, _linkToken) {
         owner = msg.sender;
         keyHash = _keyHash;
+		fee = _fee;
     }
 
     /// @dev Sends a random number request to the Chainlink VRF system.
@@ -30,7 +35,7 @@ contract RandomEmitter is VRFConsumerBase {
             msg.sender == owner,
             "Only the owner can request for a random number."
         );
-        currentRequestId = requestRandomness(keyHash, 0.0001 ether);
+        currentRequestId = requestRandomness(keyHash, fee);
         emit Request(currentRequestId);
     }
 
@@ -56,4 +61,30 @@ contract RandomEmitter is VRFConsumerBase {
         LINK.transfer(owner, currentBalance);
         emit ReturnLink(currentBalance);
     }
+
+	/**
+	 * @dev change the LINK fee of the contract
+	 * @param _fee new LINK fee of the contract
+	 */
+	function getFee() public view returns (uint256 _fee) {
+		require(
+            msg.sender == owner,
+            "Only the owner can get the actual fee."
+        );
+		_fee = fee;
+	}
+
+	/**
+	 * @dev change the LINK fee of the contract
+	 * @param _fee new LINK fee of the contract
+	 */
+	function chgFee(uint256 _fee) public  {
+		require(
+            msg.sender == owner,
+            "Only the owner can change de Fee."
+        );
+		uint256 _oldFee = fee;
+		fee = _fee;
+		emit ChgFee(_oldFee, _fee);
+	}
 }
